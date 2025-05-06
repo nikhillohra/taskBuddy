@@ -1,0 +1,24 @@
+
+.custom-calendar {
+    --rdp-accent-color: #7B1984; 
+    --rdp-background-color: #fce7f3; /* soft pink */
+    font-family: inherit;
+  }
+  
+  .custom-calendar .rdp-day_selected {
+    background-color: #7B1984 !important;
+    color: white;
+    border-radius: 6px;
+  }
+  
+  .custom-calendar .rdp-day_range_start,
+  .custom-calendar .rdp-day_range_end,
+  .custom-calendar .rdp-day_range_middle {
+    background-color: #f5eff2;
+    border-radius: 0;
+  }
+  
+  .custom-calendar .rdp-caption_dropdowns {
+    color: #9333ea;
+  }
+  
