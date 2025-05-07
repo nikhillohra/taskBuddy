@@ -83,9 +83,9 @@ const TaskListView = () => {
   }, [tasks, debouncedQuery, category, dueDateOrder]);
 
   const groupedTasks: Record<Task["status"], Task[]> = {
-    "TO-DO": filteredTasks.filter((t) => t.status === "TO-DO"),
-    "IN-PROGRESS": filteredTasks.filter((t) => t.status === "IN-PROGRESS"),
-    COMPLETED: filteredTasks.filter((t) => t.status === "COMPLETED"),
+    "TO-DO": filteredTasks.filter((t) => t.status === "TO-DO").sort((a, b) => a.order - b.order),
+    "IN-PROGRESS": filteredTasks.filter((t) => t.status === "IN-PROGRESS").sort((a, b) => a.order - b.order),
+    COMPLETED: filteredTasks.filter((t) => t.status === "COMPLETED").sort((a, b) => a.order - b.order),
   };
 
   const [collapsedSections, setCollapsedSections] = useState<
@@ -96,27 +96,59 @@ const TaskListView = () => {
     COMPLETED: false,
   });
 
-  const handleDragEnd = async (event: DragEndEvent, section: Task["status"]) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
     const draggedTask = tasks.find((t) => t.id === active.id);
     if (!draggedTask) return;
 
-    const sectionTasks = groupedTasks[section];
-    const oldIndex = sectionTasks.findIndex((t) => t.id === active.id);
-    const newIndex = sectionTasks.findIndex((t) => t.id === over.id);
+    const overTask = tasks.find((t) => t.id === over.id);
+    if (!overTask) return;
 
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const newTasks = [...sectionTasks];
-      const moved = newTasks.splice(oldIndex, 1)[0];
-      newTasks.splice(newIndex, 0, moved);
+    const sourceSection = draggedTask.status;
+    const targetSection = overTask.status;
 
-      await Promise.all(
-        newTasks.map((task, index) =>
-          editTask(task.id, { ...task, order: index })
-        )
-      );
+    if (sourceSection === targetSection) {
+      // Reorder within the same section
+      const sectionTasks = groupedTasks[sourceSection];
+      const oldIndex = sectionTasks.findIndex((t) => t.id === active.id);
+      const newIndex = sectionTasks.findIndex((t) => t.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        const newTasks = [...sectionTasks];
+        const [movedTask] = newTasks.splice(oldIndex, 1);
+        newTasks.splice(newIndex, 0, movedTask);
+
+        // Update order in Firestore
+        await Promise.all(
+          newTasks.map((task, index) =>
+            editTask(task.id, { order: index })
+          )
+        );
+      }
+    } else {
+      // Move to a different section
+      const sourceTasks = groupedTasks[sourceSection];
+      const targetTasks = groupedTasks[targetSection];
+      const oldIndex = sourceTasks.findIndex((t) => t.id === active.id);
+      const newIndex = targetTasks.findIndex((t) => t.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const updatedTask = { ...draggedTask, status: targetSection };
+        const newTargetTasks = [...targetTasks];
+        newTargetTasks.splice(newIndex, 0, updatedTask);
+
+        // Update Firestore: status for the moved task, and order for target section
+        await Promise.all([
+          editTask(draggedTask.id, { status: targetSection, order: newIndex }),
+          ...newTargetTasks.map((task, index) =>
+            task.id !== draggedTask.id
+              ? editTask(task.id, { order: index })
+              : null
+          ).filter(Boolean),
+        ]);
+      }
     }
   };
 
@@ -166,47 +198,47 @@ const TaskListView = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          {(Object.keys(groupedTasks) as Task["status"][]).map((section) => (
-            <div key={section}>
-              <TaskSectionHeader
-                section={section}
-                isCollapsed={collapsedSections[section]}
-                count={groupedTasks[section].length}
-                onToggle={() =>
-                  setCollapsedSections((prev) => ({
-                    ...prev,
-                    [section]: !prev[section],
-                  }))
-                }
-              />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            {(Object.keys(groupedTasks) as Task["status"][]).map((section) => (
+              <div key={section}>
+                <TaskSectionHeader
+                  section={section}
+                  isCollapsed={collapsedSections[section]}
+                  count={groupedTasks[section].length}
+                  onToggle={() =>
+                    setCollapsedSections((prev) => ({
+                      ...prev,
+                      [section]: !prev[section],
+                    }))
+                  }
+                />
 
-              {!collapsedSections[section] && (
-                <>
-                  {section === "TO-DO" && (
-                    <div className="px-4 py-3 bg-[#F1F1F1] text-start border-b border-neutral-400">
-                      <Button
-                        variant="outline"
-                        className="font-bold border-none cursor-pointer text-sm"
-                        onClick={() => setShowAddTask(true)}
-                        disabled={showAddTask}
-                      >
-                        <span className="text-[#7B1984]">+</span> ADD TASK
-                      </Button>
-                    </div>
-                  )}
+                {!collapsedSections[section] && (
+                  <>
+                    {section === "TO-DO" && (
+                      <div className="px-4 py-3 bg-[#F1F1F1] text-start border-b border-neutral-400">
+                        <Button
+                          variant="outline"
+                          className="font-bold border-none cursor-pointer text-sm"
+                          onClick={() => setShowAddTask(true)}
+                          disabled={showAddTask}
+                        >
+                          <span className="text-[#7B1984]">+</span> ADD TASK
+                        </Button>
+                      </div>
+                    )}
 
-                  {section === "TO-DO" && showAddTask && (
-                    <AddTaskRow
-                      onAdd={handleAddTask}
-                      onCancel={() => setShowAddTask(false)}
-                    />
-                  )}
+                    {section === "TO-DO" && showAddTask && (
+                      <AddTaskRow
+                        onAdd={handleAddTask}
+                        onCancel={() => setShowAddTask(false)}
+                      />
+                    )}
 
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event) => handleDragEnd(event, section)}
-                  >
                     <SortableContext
                       items={groupedTasks[section].map((t) => t.id)}
                       strategy={verticalListSortingStrategy}
@@ -238,11 +270,11 @@ const TaskListView = () => {
                         )
                       )}
                     </SortableContext>
-                  </DndContext>
-                </>
-              )}
-            </div>
-          ))}
+                  </>
+                )}
+              </div>
+            ))}
+          </DndContext>
 
           {selectedTaskIds.length > 0 && (
             <BulkActionBar
