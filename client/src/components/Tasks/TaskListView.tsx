@@ -83,9 +83,15 @@ const TaskListView = () => {
   }, [tasks, debouncedQuery, category, dueDateOrder]);
 
   const groupedTasks: Record<Task["status"], Task[]> = {
-    "TO-DO": filteredTasks.filter((t) => t.status === "TO-DO").sort((a, b) => a.order - b.order),
-    "IN-PROGRESS": filteredTasks.filter((t) => t.status === "IN-PROGRESS").sort((a, b) => a.order - b.order),
-    COMPLETED: filteredTasks.filter((t) => t.status === "COMPLETED").sort((a, b) => a.order - b.order),
+    "TO-DO": filteredTasks
+      .filter((t) => t.status === "TO-DO")
+      .sort((a, b) => a.order - b.order),
+    "IN-PROGRESS": filteredTasks
+      .filter((t) => t.status === "IN-PROGRESS")
+      .sort((a, b) => a.order - b.order),
+    COMPLETED: filteredTasks
+      .filter((t) => t.status === "COMPLETED")
+      .sort((a, b) => a.order - b.order),
   };
 
   const [collapsedSections, setCollapsedSections] = useState<
@@ -122,9 +128,7 @@ const TaskListView = () => {
 
         // Update order in Firestore
         await Promise.all(
-          newTasks.map((task, index) =>
-            editTask(task.id, { order: index })
-          )
+          newTasks.map((task, index) => editTask(task.id, { order: index }))
         );
       }
     } else {
@@ -142,11 +146,13 @@ const TaskListView = () => {
         // Update Firestore: status for the moved task, and order for target section
         await Promise.all([
           editTask(draggedTask.id, { status: targetSection, order: newIndex }),
-          ...newTargetTasks.map((task, index) =>
-            task.id !== draggedTask.id
-              ? editTask(task.id, { order: index })
-              : null
-          ).filter(Boolean),
+          ...newTargetTasks
+            .map((task, index) =>
+              task.id !== draggedTask.id
+                ? editTask(task.id, { order: index })
+                : null
+            )
+            .filter(Boolean),
         ]);
       }
     }
@@ -179,7 +185,7 @@ const TaskListView = () => {
         onOpenCreateTaskModal={() => setShowAddModal(true)}
       />
 
-      <div className="hidden sm:grid grid-cols-[40px_30px_24px_1fr_150px_150px_150px_40px] font-semibold text-sm text-gray-600 px-4">
+      <div className="hidden md:grid-cols-[40px_30px_40px_1fr_200px_200px_200px_40px] sm:grid grid-cols-[40px_30px_24px_1fr_240px_240px_240px_40px] font-semibold text-sm text-gray-600 px-4">
         <span></span>
         <span></span>
         <span></span>
@@ -194,7 +200,11 @@ const TaskListView = () => {
 
       {filteredTasks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <img src={notFoundImage} alt="No tasks found" className="w-[20rem] h-auto" />
+          <img
+            src={notFoundImage}
+            alt="No tasks found"
+            className="w-[20rem] h-auto"
+          />
         </div>
       ) : (
         <div className="space-y-8">

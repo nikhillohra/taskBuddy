@@ -86,7 +86,7 @@ const AddTaskRow = ({ onAdd, onCancel }: Props) => {
 
   return (
     <>
-      <div className="grid grid-cols-[40px_30px_24px_1fr_150px_150px_150px_40px] items-center px-4 py-3 border-b bg-[#F1F1F1] text-sm relative">
+      <div className="grid md:grid-cols-[40px_30px_40px_1fr_200px_200px_200px_40px] grid-cols-[40px_30px_24px_1fr_240px_240px_240px_40px] items-center px-4 py-3 border-b bg-[#F1F1F1] text-sm relative">
         <span></span>
         <span></span>
         <span></span>

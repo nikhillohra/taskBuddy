@@ -33,7 +33,10 @@ interface TaskRowProps {
 
 const highlightText = (text: string, query: string) => {
   if (!query || !text) return text;
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const regex = new RegExp(
+    `(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+    "gi"
+  );
   return text.split(regex).map((part, index) =>
     part.toLowerCase() === query.toLowerCase() ? (
       <mark key={index} className="bg-yellow-200 px-1 rounded">
@@ -55,7 +58,14 @@ const TaskRow: React.FC<TaskRowProps> = ({
   onDelete,
   highlightQuery = "",
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: task.id,
   });
 
@@ -79,7 +89,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`grid grid-cols-[30px_24px_1fr] sm:grid-cols-[40px_30px_24px_1fr_150px_150px_150px_40px] items-center px-4 py-3 border-b border-neutral-400 text-sm bg-[#F1F1F1] hover:bg-gray-50 ${
+      className={`grid grid-cols-[30px_24px_1fr] md:grid-cols-[40px_30px_40px_1fr_200px_200px_200px_40px] sm:grid-cols-[40px_30px_40px_1fr_240px_240px_240px_40px] items-center px-4 py-3 border-b border-neutral-400 text-sm bg-[#F1F1F1] hover:bg-gray-50 ${
         isDragging ? "z-10" : ""
       }`}
       {...attributes}
@@ -110,7 +120,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
       {/* Task Title */}
       <span
-        className={`truncate ${section === "COMPLETED" ? "line-through text-gray-500" : ""}`}
+        className={`truncate ${
+          section === "COMPLETED" ? "line-through text-gray-500" : ""
+        }`}
         title={task.title} // Tooltip for long titles
       >
         {highlightText(task.title, highlightQuery)}
@@ -123,7 +135,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
       <div className="hidden sm:block">
         <Select
           value={task.status}
-          onValueChange={(val) => onStatusChange(task.id, val as Task["status"])}
+          onValueChange={(val) =>
+            onStatusChange(task.id, val as Task["status"])
+          }
           disabled={isDragging} // Prevent interaction during drag
         >
           <SelectTrigger className="w-[7rem] h-6 text-center justify-center">

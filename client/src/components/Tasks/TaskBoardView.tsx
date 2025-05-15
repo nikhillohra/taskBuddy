@@ -144,7 +144,7 @@ export default function TaskBoardView() {
                 return (
                   <div
                     key={status}
-                    className="bg-gray-50 p-4 rounded-xl min-h-[300px] transition-all duration-300"
+                    className="bg-[#F1F1F1] border-[#58575112] border p-4 rounded-xl min-h-[300px] transition-all duration-300"
                   >
                     <h2
                       className={`text-base mb-4 px-2 py-1 rounded-md inline-block ${

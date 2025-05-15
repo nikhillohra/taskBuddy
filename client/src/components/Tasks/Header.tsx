@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
@@ -14,9 +15,10 @@ interface HeaderProps {
 
 const Header = ({ currentView, setView }: HeaderProps) => {
   const { user, logout } = useAuth();
+  const [showLogout, setShowLogout] = useState(false);
 
   return (
-    <div className="flex justify-between items-start sm:px-6 px-2">
+    <div className="flex justify-between items-start sm:px-6 px-2 relative">
       <div>
         {/* App Logo */}
         <img src={taskLogo} alt="TaskLogo" className="w-[80%]" />
@@ -44,9 +46,9 @@ const Header = ({ currentView, setView }: HeaderProps) => {
         </div>
       </div>
 
-      {/* User avatar and logout */}
-      <div className="flex flex-col items-start gap-1">
-        <div className="flex items-center gap-2">
+      {/* Avatar and Logout Toggle */}
+      <div className="flex flex-col items-end gap-1 relative">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowLogout(!showLogout)}>
           <Avatar>
             <AvatarImage src={user?.photoURL || ""} alt="User avatar" />
             <AvatarFallback>
@@ -56,14 +58,16 @@ const Header = ({ currentView, setView }: HeaderProps) => {
           <span className="font-medium text-[#00000099]">{user?.displayName}</span>
         </div>
 
-        {/* Logout button (hidden on small screens) */}
-        <Button
-          variant="outline"
-          onClick={logout}
-          className="sm:flex hidden justify-center items-center gap-1 bg-[#FFF9F9] border-[#7B198426] text-sm rounded-xl"
-        >
-          <img src={logoutIcon} alt="logoutIcon" /> Logout
-        </Button>
+        {/* Logout Button */}
+        {showLogout && (
+          <Button
+            variant="outline"
+            onClick={logout}
+            className="flex justify-center items-center gap-1 bg-[#FFF9F9] border-[#7B198426] text-sm rounded-xl mt-1"
+          >
+            <img src={logoutIcon} alt="logoutIcon" /> Logout
+          </Button>
+        )}
       </div>
     </div>
   );
