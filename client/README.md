@@ -1,54 +1,30 @@
-# React + TypeScript + Vite
+# TaskBuddy 📝
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**TaskBuddy** is a modern task management web application designed to help users organize their daily tasks efficiently. Built using **React**, **Firebase**, and **Tailwind CSS**, it offers a clean UI with both **List** and **Board** views, user authentication via **Google Sign-In**, and task filtering, editing, and categorization.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- ✅ Google Sign-In with Firebase Authentication  
+- 🧩 Task creation, editing, and deletion  
+- 📂 Category filters (Work / Personal)  
+- 🗂️ Sort and group tasks by status (TODO, IN-PROGRESS, COMPLETED)  
+- 🗓️ Due date handling and sorting  
+- 🔍 Task search bar with live filtering  
+- 🧠 Activity logs per task  
+- 🖼️ Image attachments per task  
+- 🪄 Switch between **List View** and **Board View** for different productivity styles  
+- 📱 Responsive design with mobile-first layout
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 🛠️ Tech Stack
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- **React (Vite + TypeScript)**
+- **Tailwind CSS**
+- **Firebase**
+  - Authentication (Google)
+  - Firestore (Realtime DB)
+  - Storage (for task image uploads)
+- **Lucide Icons**
