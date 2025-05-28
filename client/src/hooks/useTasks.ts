@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { db } from "@/services/firebase-config";
+import { query, where } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import {
   collection,
   getDocs,
@@ -19,10 +21,20 @@ export const useTasks = () => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
-        const snapshot = await getDocs(collection(db, "task-buddy"));
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const tasksQuery = query(
+          collection(db, "task-buddy"),
+          where("userId", "==", user.uid)
+        );
+
+        const snapshot = await getDocs(tasksQuery);
         const tasksData: Task[] = snapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() } as Task))
           .sort((a, b) => a.order - b.order);
+
         setTasks(tasksData);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -35,12 +47,21 @@ export const useTasks = () => {
   }, []);
 
   // Add a task to Firestore
-  const addTask = async (newTask: Omit<Task, "id">) => {
+  const addTask = async (newTask: Omit<Task, "id" | "userId">) => {
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("User not authenticated");
+
       const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.order)) : 0;
-      const newTaskWithOrder = { ...newTask, order: maxOrder + 1 };
-      const docRef = await addDoc(collection(db, "task-buddy"), newTaskWithOrder);
-      setTasks((prevTasks) => [...prevTasks, { id: docRef.id, ...newTaskWithOrder }]);
+      const newTaskWithExtras = {
+        ...newTask,
+        userId: user.uid,
+        order: maxOrder + 1,
+      };
+
+      const docRef = await addDoc(collection(db, "task-buddy"), newTaskWithExtras);
+      setTasks((prevTasks) => [...prevTasks, { id: docRef.id, ...newTaskWithExtras }]);
     } catch (error) {
       console.error("Error adding task:", error);
     }

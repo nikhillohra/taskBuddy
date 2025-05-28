@@ -158,6 +158,13 @@ const TaskListView = () => {
     }
   };
 
+  const handleModalCreate = async (
+    newTask: Omit<Task, "id"> & { description?: string; image?: File }
+  ) => {
+    await addTask(newTask);
+    setShowAddModal(true);
+  };
+
   const handleAddTask = async (newTask: Omit<Task, "id">) => {
     await addTask(newTask);
     setShowAddTask(false);
@@ -302,19 +309,13 @@ const TaskListView = () => {
               onClearSelection={() => setSelectedTaskIds([])}
             />
           )}
-
-          <AddTaskModal
-            isOpen={showAddModal}
-            onClose={() => setShowAddModal(false)}
-            onCreate={async (
-              newTask: Omit<Task, "id"> & { description?: string; image?: File }
-            ) => {
-              await addTask(newTask);
-              setShowAddModal(false);
-            }}
-          />
         </div>
       )}
+      <AddTaskModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onCreate={handleModalCreate}
+      />
     </div>
   );
 };
